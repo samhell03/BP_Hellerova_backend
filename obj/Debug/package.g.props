@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <PropertyGroup>
+    <PackageJsonName Condition="$(PackageJsonName) == ''">bp_backend</PackageJsonName>
+    <PackageJsonVersion Condition="$(PackageJsonVersion) == ''">1.0.0</PackageJsonVersion>
+    <PackageJsonMain Condition="$(PackageJsonMain) == ''">app.js</PackageJsonMain>
+    <PackageJsonScriptsTest Condition="$(PackageJsonScriptsTest) == ''">echo "Error: no test specified" &amp;&amp; exit 1</PackageJsonScriptsTest>
+    <PackageJsonKeywords Condition="$(PackageJsonKeywords) == ''">[]</PackageJsonKeywords>
+    <PackageJsonAuthor Condition="$(PackageJsonAuthor) == ''"></PackageJsonAuthor>
+    <PackageJsonLicense Condition="$(PackageJsonLicense) == ''">ISC</PackageJsonLicense>
+    <PackageJsonDescription Condition="$(PackageJsonDescription) == ''"></PackageJsonDescription>
+    <PackageJsonDevdependenciesEslint Condition="$(PackageJsonDevdependenciesEslint) == ''">^10.0.0</PackageJsonDevdependenciesEslint>
+    <PackageJsonDependenciesAxios Condition="$(PackageJsonDependenciesAxios) == ''">^1.13.6</PackageJsonDependenciesAxios>
+    <PackageJsonDependenciesBcryptjs Condition="$(PackageJsonDependenciesBcryptjs) == ''">^3.0.3</PackageJsonDependenciesBcryptjs>
+    <PackageJsonDependenciesCors Condition="$(PackageJsonDependenciesCors) == ''">^2.8.6</PackageJsonDependenciesCors>
+    <PackageJsonDependenciesDotenv Condition="$(PackageJsonDependenciesDotenv) == ''">^17.3.1</PackageJsonDependenciesDotenv>
+    <PackageJsonDependenciesExpress Condition="$(PackageJsonDependenciesExpress) == ''">^5.2.1</PackageJsonDependenciesExpress>
+    <PackageJsonDependenciesGoogleAuthLibrary Condition="$(PackageJsonDependenciesGoogleAuthLibrary) == ''">^10.6.1</PackageJsonDependenciesGoogleAuthLibrary>
+    <PackageJsonDependenciesJsonwebtoken Condition="$(PackageJsonDependenciesJsonwebtoken) == ''">^9.0.3</PackageJsonDependenciesJsonwebtoken>
+    <PackageJsonDependenciesMongoose Condition="$(PackageJsonDependenciesMongoose) == ''">^9.2.0</PackageJsonDependenciesMongoose>
+    <PackageJsonDependenciesNodemailer Condition="$(PackageJsonDependenciesNodemailer) == ''">^8.0.1</PackageJsonDependenciesNodemailer>
+    <PackageJsonDependenciesResend Condition="$(PackageJsonDependenciesResend) == ''">^6.12.2</PackageJsonDependenciesResend>
+  </PropertyGroup>
+</Project>
