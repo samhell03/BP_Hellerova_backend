@@ -9,7 +9,7 @@ const tripRoutes = require("./routes/tripRoutes");
 const countryRoutes = require("./routes/countryRoutes");
 const packageRoutes = require("./routes/packageRoutes");
 const noteRoutes = require("./routes/noteRoutes");
-//const notificationRoutes = require("./routes/notifications");
+const notificationRoutes = require("./routes/notificationRoutes");
 
 const app = express();
 
@@ -52,7 +52,7 @@ app.use("/api/trips", tripRoutes);
 app.use("/api/countries", countryRoutes);
 app.use("/api/packages", packageRoutes);
 app.use("/api/notes", noteRoutes);
-//app.use("/api/notifications", notificationRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 // ===== START =====
 app.listen(PORT, "0.0.0.0", () => {

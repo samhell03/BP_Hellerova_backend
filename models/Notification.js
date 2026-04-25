@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+﻿const mongoose = require("mongoose");
 
 const NotificationSchema = new mongoose.Schema(
     {
@@ -18,8 +18,27 @@ const NotificationSchema = new mongoose.Schema(
 
         type: {
             type: String,
-            enum: ["trip_reminder_7_days", "trip_reminder_1_day"],
+            enum: [
+                "trip_reminder_7_days",
+                "trip_reminder_1_day",
+                "trip_start_today",
+                "trip_ending_1_day",
+                "trip_ending_today",
+                "weather_alert"
+            ],
             required: true
+        },
+
+        severity: {
+            type: String,
+            enum: ["info", "warning", "danger"],
+            default: "info"
+        },
+
+        sourceId: {
+            type: String,
+            default: null,
+            index: true
         },
 
         title: {

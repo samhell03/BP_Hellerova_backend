@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+﻿const mongoose = require("mongoose");
 
 const PackingItemSchema = new mongoose.Schema(
     {
@@ -60,6 +60,14 @@ const NotificationItemSchema = new mongoose.Schema(
         createdAt: {
             type: Date,
             default: Date.now
+        },
+
+        alertDate: {
+            type: Date
+        },
+        priority: {
+            type: Number,
+            default: 5
         }
     },
     { _id: true }

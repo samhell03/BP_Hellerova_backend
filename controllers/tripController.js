@@ -1,5 +1,7 @@
-const Trip = require("../models/Trip");
+ï»¿const Trip = require("../models/Trip");
 const { createPackagesForTrip } = require("./packageController");
+const Package = require("../models/Package");
+const { getEmergencyContacts } = require("../data/emergencyContacts");
 
 const MIN_TRIP_YEAR = 1950;
 const MAX_TRIP_YEAR = 2100;
@@ -32,42 +34,42 @@ function validateTripPayload(body) {
     } = body;
 
     if (!title || !title.trim()) {
-        return "Název cesty je povinnı.";
+        return "NÃ¡zev cesty je povinnÃ½.";
     }
 
     if (title.trim().length < 3) {
-        return "Název cesty musí mít alespoò 3 znaky.";
+        return "NÃ¡zev cesty musÃ­ mÃ­t alespoÅˆ 3 znaky.";
     }
 
     if (title.trim().length > 60) {
-        return "Název cesty mùe mít maximálnì 60 znakù.";
+        return "NÃ¡zev cesty mÅ¯Å¾e mÃ­t maximÃ¡lnÄ› 60 znakÅ¯.";
     }
 
     if (!country || !country.trim()) {
-        return "Zemì je povinná.";
+        return "ZemÄ› je povinnÃ¡.";
     }
 
     if (!countryCode || !countryCode.trim()) {
-        return "Kód zemì je povinnı.";
+        return "KÃ³d zemÄ› je povinnÃ½.";
     }
 
     if (countryCode.trim().length !== 2) {
-        return "Kód zemì musí mít pøesnì 2 znaky.";
+        return "KÃ³d zemÄ› musÃ­ mÃ­t pÅ™esnÄ› 2 znaky.";
     }
 
     if (city != null && typeof city !== "string") {
-        return "Mìsto musí bıt text.";
+        return "MÄ›sto musÃ­ bÃ½t text.";
     }
 
     if (typeof city === "string" && city.trim().length > 80) {
-        return "Mìsto mùe mít maximálnì 80 znakù.";
+        return "MÄ›sto mÅ¯Å¾e mÃ­t maximÃ¡lnÄ› 80 znakÅ¯.";
     }
 
     const normalizedCityLat = normalizeCoordinate(cityLat);
     const normalizedCityLng = normalizeCoordinate(cityLng);
 
     if (Number.isNaN(normalizedCityLat) || Number.isNaN(normalizedCityLng)) {
-        return "Souøadnice mìsta nejsou platné.";
+        return "SouÅ™adnice mÄ›sta nejsou platnÃ©.";
     }
 
     const hasOnlyOneCoordinate =
@@ -75,46 +77,142 @@ function validateTripPayload(body) {
         (normalizedCityLat !== null && normalizedCityLng === null);
 
     if (hasOnlyOneCoordinate) {
-        return "Souøadnice mìsta nejsou kompletní.";
+        return "SouÅ™adnice mÄ›sta nejsou kompletnÃ­.";
     }
 
     if (!startDate) {
-        return "Datum odjezdu je povinné.";
+        return "Datum odjezdu je povinnÃ©.";
     }
 
     if (!endDate) {
-        return "Datum návratu je povinné.";
+        return "Datum nÃ¡vratu je povinnÃ©.";
     }
 
     const start = new Date(startDate);
     const end = new Date(endDate);
 
     if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
-        return "Datum není ve správném formátu.";
+        return "Datum nenÃ­ ve sprÃ¡vnÃ©m formÃ¡tu.";
     }
 
     const startYear = start.getFullYear();
     const endYear = end.getFullYear();
 
     if (startYear < MIN_TRIP_YEAR || startYear > MAX_TRIP_YEAR) {
-        return `Datum odjezdu musí bıt v rozmezí let ${MIN_TRIP_YEAR} a ${MAX_TRIP_YEAR}.`;
+        return `Datum odjezdu musÃ­ bÃ½t v rozmezÃ­ let ${MIN_TRIP_YEAR} aÅ¾ ${MAX_TRIP_YEAR}.`;
     }
 
     if (endYear < MIN_TRIP_YEAR || endYear > MAX_TRIP_YEAR) {
-        return `Datum návratu musí bıt v rozmezí let ${MIN_TRIP_YEAR} a ${MAX_TRIP_YEAR}.`;
+        return `Datum nÃ¡vratu musÃ­ bÃ½t v rozmezÃ­ let ${MIN_TRIP_YEAR} aÅ¾ ${MAX_TRIP_YEAR}.`;
     }
 
     if (start > end) {
-        return "Datum od nemùe bıt po datu do.";
+        return "Datum od nemÅ¯Å¾e bÃ½t po datu do.";
     }
 
     const diffDays = Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
 
     if (diffDays > MAX_TRIP_DURATION_DAYS) {
-        return `Vılet mùe trvat maximálnì ${MAX_TRIP_DURATION_DAYS} dní.`;
+        return `VÃ½let mÅ¯Å¾e trvat maximÃ¡lnÄ› ${MAX_TRIP_DURATION_DAYS} dnÃ­.`;
     }
 
     return null;
+}
+
+function createPackingItems(items = []) {
+    return items.map((text) => ({
+        text,
+        checked: false
+    }));
+}
+
+function getBasePackingItems() {
+    return [
+        "CestovnÃ­ doklady",
+        "PenÄ›Å¾enka a karta",
+        "Telefon",
+        "NabÃ­jeÄka",
+        "ObleÄenÃ­",
+        "Hygiena",
+        "LÃ©ky",
+        "KlÃ­Äe",
+        "LÃ¡hev na vodu"
+    ];
+}
+
+function getCategoryPackingItems(category) {
+    switch (category) {
+        case "vacation":
+            return [
+                "Plavky",
+                "RuÄnÃ­k",
+                "SluneÄnÃ­ brÃ½le",
+                "OpalovacÃ­ krÃ©m",
+                "PokrÃ½vka hlavy",
+                "SandÃ¡ly / lehkÃ¡ obuv"
+            ];
+
+        case "mountains":
+            return [
+                "PevnÃ© boty",
+                "FunkÄnÃ­ obleÄenÃ­",
+                "TeplÃ¡ mikina",
+                "NepromokavÃ¡ bunda",
+                "NÃ¡hradnÃ­ ponoÅ¾ky",
+                "Batoh",
+                "Powerbanka",
+                "LÃ©kÃ¡rniÄka"
+            ];
+
+        case "camping":
+            return [
+                "Stan",
+                "SpacÃ¡k",
+                "Karimatka",
+                "ÄŒelovka",
+                "VaÅ™iÄ / eÅ¡us",
+                "Repelent",
+                "Sirky / zapalovaÄ",
+                "NÅ¯Å¾",
+                "Powerbanka"
+            ];
+
+        case "city":
+            return [
+                "PohodlnÃ© boty",
+                "Doklady / rezervace",
+                "MÄ›stskÃ½ batoh / kabelka",
+                "SluchÃ¡tka",
+                "DeÅ¡tnÃ­k"
+            ];
+
+        case "roadtrip":
+            return [
+                "Å˜idiÄskÃ½ prÅ¯kaz",
+                "Doklady od auta",
+                "NabÃ­jeÄka do auta",
+                "DrÅ¾Ã¡k na mobil",
+                "Powerbanka",
+                "Voda a svaÄina",
+                "SluneÄnÃ­ brÃ½le",
+                "LÃ©kÃ¡rniÄka",
+                "Hotovost"
+            ];
+
+        default:
+            return [];
+    }
+}
+
+function getPackingItemsForTrip(trip) {
+    const uniqueItems = [
+        ...new Set([
+            ...getBasePackingItems(),
+            ...getCategoryPackingItems(trip?.category)
+        ])
+    ];
+
+    return createPackingItems(uniqueItems);
 }
 
 // POST /api/trips
@@ -157,13 +255,13 @@ exports.createTrip = async (req, res) => {
 
         await newTrip.save();
 
-        // ?? vytvoøení balíèkù podle vıbìru
+        // ?? vytvoÅ™enÃ­ balÃ­ÄkÅ¯ podle vÃ½bÄ›ru
         if (selectedPackages && Array.isArray(selectedPackages) && selectedPackages.length > 0) {
             try {
                 await createPackagesForTrip(userId, newTrip._id, selectedPackages);
             } catch (pkgErr) {
                 console.error("Package creation error:", pkgErr);
-                // nechceme shodit celı request kvùli balíèkùm
+                // nechceme shodit celÃ½ request kvÅ¯li balÃ­ÄkÅ¯m
             }
         }
 
@@ -173,13 +271,13 @@ exports.createTrip = async (req, res) => {
         if (err.name === "ValidationError") {
             const firstError = Object.values(err.errors)[0];
             return res.status(400).json({
-                message: firstError?.message || "Neplatná data vıletu."
+                message: firstError?.message || "NeplatnÃ¡ data vÃ½letu."
             });
         }
 
         console.error("Create trip error:", err);
         return res.status(500).json({
-            message: "Chyba serveru pøi vytváøení vıletu."
+            message: "Chyba serveru pÅ™i vytvÃ¡Å™enÃ­ vÃ½letu."
         });
     }
 };
@@ -194,7 +292,7 @@ exports.getMyTrips = async (req, res) => {
     } catch (err) {
         console.error("Get my trips error:", err);
         return res.status(500).json({
-            message: "Chyba serveru pøi naèítání vıletù."
+            message: "Chyba serveru pÅ™i naÄÃ­tÃ¡nÃ­ vÃ½letÅ¯."
         });
     }
 };
@@ -206,14 +304,14 @@ exports.getTripById = async (req, res) => {
         const trip = await Trip.findOne({ _id: req.params.id, userId });
 
         if (!trip) {
-            return res.status(404).json({ message: "Vılet nenalezen." });
+            return res.status(404).json({ message: "VÃ½let nenalezen." });
         }
 
         return res.json(trip);
     } catch (err) {
         console.error("Get trip by id error:", err);
         return res.status(500).json({
-            message: "Chyba serveru pøi naèítání vıletu."
+            message: "Chyba serveru pÅ™i naÄÃ­tÃ¡nÃ­ vÃ½letu."
         });
     }
 };
@@ -253,11 +351,46 @@ exports.updateTrip = async (req, res) => {
                 endDate,
                 category: category || "general" // ??
             },
-            { new: true, runValidators: true }
+            { returnDocument: "after", runValidators: true }
         );
 
         if (!updated) {
-            return res.status(404).json({ message: "Vılet nenalezen." });
+            return res.status(404).json({ message: "VÃ½let nenalezen." });
+        }
+        const existingPackages = await Package.find({
+            userId,
+            tripId: updated._id,
+            isEnabled: true
+        });
+
+        for (const pack of existingPackages) {
+            if (pack.type === "packing") {
+                pack.packingItems = getPackingItemsForTrip(updated);
+                pack.meta = {
+                    ...(pack.meta || {}),
+                    category: updated.category || "general",
+                    generatedFromCategory: true,
+                    regeneratedAfterTripEdit: true
+                };
+
+                await pack.save();
+            }
+
+            if (pack.type === "contacts") {
+                pack.contacts = [
+                    ...getEmergencyContacts(updated.countryCode),
+                    { label: "AmbasÃ¡da", value: "" },
+                    { label: "PojiÅ¡Å¥ovna", value: "" },
+                    { label: "NouzovÃ½ kontakt", value: "" }
+                ];
+
+                await pack.save();
+            }
+
+            if (pack.type === "notifications") {
+                pack.notifications = [];
+                await pack.save();
+            }
         }
 
         return res.json(updated);
@@ -265,13 +398,13 @@ exports.updateTrip = async (req, res) => {
         if (err.name === "ValidationError") {
             const firstError = Object.values(err.errors)[0];
             return res.status(400).json({
-                message: firstError?.message || "Neplatná data vıletu."
+                message: firstError?.message || "NeplatnÃ¡ data vÃ½letu."
             });
         }
 
         console.error("Update trip error:", err);
         return res.status(500).json({
-            message: "Chyba serveru pøi úpravì vıletu."
+            message: "Chyba serveru pÅ™i ÃºpravÄ› vÃ½letu."
         });
     }
 };
@@ -287,14 +420,14 @@ exports.deleteTrip = async (req, res) => {
         });
 
         if (!deleted) {
-            return res.status(404).json({ message: "Vılet nenalezen." });
+            return res.status(404).json({ message: "VÃ½let nenalezen." });
         }
 
-        return res.json({ message: "Vılet byl úspìšnì smazán." });
+        return res.json({ message: "VÃ½let byl ÃºspÄ›Å¡nÄ› smazÃ¡n." });
     } catch (err) {
         console.error("Delete trip error:", err);
         return res.status(500).json({
-            message: "Chyba serveru pøi mazání vıletu."
+            message: "Chyba serveru pÅ™i mazÃ¡nÃ­ vÃ½letu."
         });
     }
 };

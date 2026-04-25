@@ -2,6 +2,7 @@
 const axios = require("axios");
 const Package = require("../models/Package");
 const Trip = require("../models/Trip");
+const Notification = require("../models/Notification");
 const { getEmergencyContacts } = require("../data/emergencyContacts");
 
 function createPackingItems(items = []) {
@@ -28,73 +29,22 @@ function getBasePackingItems() {
 function getCategoryPackingItems(category) {
     switch (category) {
         case "vacation":
-            return [
-                "Plavky",
-                "Ručník",
-                "Sluneční brýle",
-                "Opalovací krém",
-                "Pokrývka hlavy",
-                "Sandály / lehká obuv"
-            ];
-
+            return ["Plavky", "Ručník", "Sluneční brýle", "Opalovací krém", "Pokrývka hlavy", "Sandály / lehká obuv"];
         case "mountains":
-            return [
-                "Pevné boty",
-                "Funkční oblečení",
-                "Teplá mikina",
-                "Nepromokavá bunda",
-                "Náhradní ponožky",
-                "Batoh",
-                "Powerbanka",
-                "Lákárnička"
-            ];
-
+            return ["Pevné boty", "Funkční oblečení", "Teplá mikina", "Nepromokavá bunda", "Náhradní ponožky", "Batoh", "Powerbanka", "Lékárnička"];
         case "camping":
-            return [
-                "Stan",
-                "Spacák",
-                "Karimatka",
-                "Čelovka",
-                "Vařič / ešus",
-                "Repelent",
-                "Sirky / zapalovač",
-                "Nůž",
-                "Powerbanka"
-            ];
-
+            return ["Stan", "Spacák", "Karimatka", "Čelovka", "Vařič / ešus", "Repelent", "Sirky / zapalovač", "Nůž", "Powerbanka"];
         case "city":
-            return [
-                "Pohodlné boty",
-                "Doklady / rezervace",
-                "Městský batoh / kabelka",
-                "Sluchátka",
-                "Deštník"
-            ];
-
+            return ["Pohodlné boty", "Doklady / rezervace", "Městský batoh / kabelka", "Sluchátka", "Deštník"];
         case "roadtrip":
-            return [
-                "Řidičský průkaz",
-                "Doklady od auta",
-                "Nabíječka do auta",
-                "Držák na mobil",
-                "Powerbanka",
-                "Voda a svačina",
-                "Sluneční brýle",
-                "Lékárnička",
-                "Hotovost"
-            ];
-
+            return ["Řidičský průkaz", "Doklady od auta", "Nabíječka do auta", "Držák na mobil", "Powerbanka", "Voda a svačina", "Sluneční brýle", "Lékárnička", "Hotovost"];
         default:
             return [];
     }
 }
 
 function getPackingItemsForTrip(trip) {
-    const baseItems = getBasePackingItems();
-    const categoryItems = getCategoryPackingItems(trip?.category);
-
-    const uniqueItems = [...new Set([...baseItems, ...categoryItems])];
-
+    const uniqueItems = [...new Set([...getBasePackingItems(), ...getCategoryPackingItems(trip?.category)])];
     return createPackingItems(uniqueItems);
 }
 
@@ -155,32 +105,45 @@ function createTemplatePayload(type, trip) {
                     generatedFromCategory: true
                 }
             };
-            
+
         default:
             return null;
     }
 }
 
 async function fetchWeather(lat, lng) {
-    const url = "https://api.open-meteo.com/v1/forecast";
-
-    const response = await axios.get(url, {
+    const response = await axios.get("https://api.open-meteo.com/v1/forecast", {
         params: {
             latitude: lat,
             longitude: lng,
-
             current: "temperature_2m,weather_code,wind_speed_10m",
-
             hourly: "temperature_2m,weather_code",
-
             daily: "temperature_2m_max,temperature_2m_min,weather_code,precipitation_sum",
-
             timezone: "auto",
             forecast_days: 3
         }
     });
 
     return response.data;
+}
+
+function formatAlertDate(day) {
+    return new Date(day).toLocaleDateString("cs-CZ", {
+        weekday: "long",
+        day: "numeric",
+        month: "numeric"
+    });
+}
+
+function isTripOngoing(trip) {
+    const today = new Date();
+    const start = new Date(trip.startDate);
+    const end = new Date(trip.endDate);
+
+    start.setHours(0, 0, 0, 0);
+    end.setHours(23, 59, 59, 999);
+
+    return start <= today && today <= end;
 }
 
 function buildWeatherAlerts(weatherData, thresholds = {}) {
@@ -203,49 +166,93 @@ function buildWeatherAlerts(weatherData, thresholds = {}) {
         if (typeof max === "number" && max >= hotTemp) {
             notifications.push({
                 title: "Extrémní horko",
-                message: `${day}: očekává se vysoká teplota ${max} °C.`,
-                severity: "warning"
+                message: `${formatAlertDate(day)} může být až ${Math.round(max)} °C.`,
+                severity: "warning",
+                alertDate: new Date(day),
+                priority: 2
             });
         }
 
         if (typeof min === "number" && min <= coldTemp) {
             notifications.push({
                 title: "Nízká teplota",
-                message: `${day}: očekává se pokles teploty na ${min} °C.`,
-                severity: "warning"
+                message: `${formatAlertDate(day)} může teplota klesnout na ${Math.round(min)} °C.`,
+                severity: "warning",
+                alertDate: new Date(day),
+                priority: 2
             });
         }
 
         if (typeof rain === "number" && rain >= rainMm) {
             notifications.push({
                 title: "Vydatný déšť",
-                message: `${day}: očekávané srážky ${rain} mm.`,
-                severity: "warning"
+                message: `${formatAlertDate(day)} se očekává vydatný déšť (${Math.round(rain)} mm).`,
+                severity: "warning",
+                alertDate: new Date(day),
+                priority: 3
             });
         }
 
         if ([95, 96, 99].includes(code)) {
             notifications.push({
                 title: "Bouřka",
-                message: `${day}: předpověď indikuje bouřku.`,
-                severity: "danger"
+                message: `${formatAlertDate(day)} předpověď indikuje bouřku.`,
+                severity: "danger",
+                alertDate: new Date(day),
+                priority: 1
             });
         }
     }
 
     const currentWind = weatherData?.current?.wind_speed_10m;
+
     if (typeof currentWind === "number" && currentWind >= windKmH) {
         notifications.push({
             title: "Silný vítr",
-            message: `Aktuálně je hlášen silný vítr ${currentWind} km/h.`,
-            severity: "warning"
+            message: `Aktuálně je v destinaci hlášen silný vítr ${Math.round(currentWind)} km/h.`,
+            severity: "warning",
+            alertDate: new Date(),
+            priority: 4
         });
     }
+
+    notifications.sort((a, b) => {
+        const dateDiff = new Date(a.alertDate || 0) - new Date(b.alertDate || 0);
+        if (dateDiff !== 0) return dateDiff;
+        return (a.priority || 5) - (b.priority || 5);
+    });
 
     return notifications;
 }
 
-// POST /api/packages/import-template
+async function createWeatherBellNotifications(userId, trip, alerts) {
+    if (!isTripOngoing(trip)) return;
+
+    for (const alert of alerts) {
+        const sourceId = `weather-${trip._id}-${alert.title}-${new Date(alert.alertDate || Date.now()).toISOString()}`;
+
+        const exists = await Notification.findOne({
+            userId,
+            tripId: trip._id,
+            type: "weather_alert",
+            sourceId
+        });
+
+        if (exists) continue;
+
+        await Notification.create({
+            userId,
+            tripId: trip._id,
+            type: "weather_alert",
+            title: alert.title,
+            message: `${trip.title}: ${alert.message}`,
+            severity: alert.severity || "warning",
+            scheduledFor: alert.alertDate || new Date(),
+            sourceId
+        });
+    }
+}
+
 exports.importTemplateToTrip = async (req, res) => {
     try {
         const userId = req.user._id;
@@ -289,7 +296,6 @@ exports.importTemplateToTrip = async (req, res) => {
     }
 };
 
-// GET /api/packages/trip/:tripId
 exports.getTripPackages = async (req, res) => {
     try {
         const userId = req.user._id;
@@ -313,7 +319,6 @@ exports.getTripPackages = async (req, res) => {
     }
 };
 
-// GET /api/packages/:id/weather
 exports.getPackageWeather = async (req, res) => {
     try {
         const userId = req.user._id;
@@ -328,16 +333,13 @@ exports.getPackageWeather = async (req, res) => {
             return res.status(404).json({ message: "Výlet nebyl nalezen." });
         }
 
-        const lat = trip.cityLat;
-        const lng = trip.cityLng;
-
-        if (lat == null || lng == null) {
+        if (trip.cityLat == null || trip.cityLng == null) {
             return res.status(400).json({
                 message: "Výlet nemá uložené souřadnice města, počasí nelze načíst."
             });
         }
 
-        const weather = await fetchWeather(lat, lng);
+        const weather = await fetchWeather(trip.cityLat, trip.cityLng);
         return res.json(weather);
     } catch (err) {
         console.error("Get package weather error:", err);
@@ -351,20 +353,16 @@ async function createPackagesForTrip(userId, tripId, selectedPackages = []) {
     }
 
     const trip = await Trip.findOne({ _id: tripId, userId });
-
     if (!trip) {
         throw new Error("Výlet nebyl nalezen pro vytvoření balíčků.");
     }
 
-    const uniqueTypes = [...new Set(selectedPackages)];
-
     const allowedTypes = ["weather", "notifications", "contacts", "packing"];
+    const validTypes = [...new Set(selectedPackages)].filter((type) =>
+        allowedTypes.includes(type)
+    );
 
-    const validTypes = uniqueTypes.filter((type) => allowedTypes.includes(type));
-
-    if (validTypes.length === 0) {
-        return [];
-    }
+    if (validTypes.length === 0) return [];
 
     const existingPackages = await Package.find({
         userId,
@@ -374,20 +372,14 @@ async function createPackagesForTrip(userId, tripId, selectedPackages = []) {
     }).select("type");
 
     const existingTypes = existingPackages.map((pkg) => pkg.type);
-
     const typesToCreate = validTypes.filter((type) => !existingTypes.includes(type));
 
-    if (typesToCreate.length === 0) {
-        return [];
-    }
+    if (typesToCreate.length === 0) return [];
 
     const payloads = typesToCreate
         .map((type) => {
             const payload = createTemplatePayload(type, trip);
-
-            if (!payload) {
-                return null;
-            }
+            if (!payload) return null;
 
             return {
                 userId,
@@ -397,16 +389,11 @@ async function createPackagesForTrip(userId, tripId, selectedPackages = []) {
         })
         .filter(Boolean);
 
-    if (payloads.length === 0) {
-        return [];
-    }
+    if (payloads.length === 0) return [];
 
-    const createdPackages = await Package.insertMany(payloads);
-
-    return createdPackages;
+    return Package.insertMany(payloads);
 }
 
-// POST /api/packages/:id/generate-alerts
 exports.generatePackageAlerts = async (req, res) => {
     try {
         const userId = req.user._id;
@@ -432,17 +419,27 @@ exports.generatePackageAlerts = async (req, res) => {
         const weather = await fetchWeather(trip.cityLat, trip.cityLng);
         const alerts = buildWeatherAlerts(weather, pack.meta?.thresholds || {});
 
-        pack.notifications = alerts;
-        await pack.save();
+        const updatedPack = await Package.findOneAndUpdate(
+            { _id: pack._id, userId },
+            {
+                $set: {
+                    notifications: alerts
+                }
+            },
+            {
+                returnDocument: "after"
+            }
+        );
 
-        return res.json(pack.notifications);
+        await createWeatherBellNotifications(userId, trip, alerts);
+
+        return res.json(updatedPack.notifications || []);
     } catch (err) {
         console.error("Generate alerts error:", err);
         return res.status(500).json({ message: "Chyba při generování notifikací." });
     }
 };
 
-// PUT /api/packages/:id
 exports.updatePackage = async (req, res) => {
     try {
         const userId = req.user._id;
@@ -468,7 +465,6 @@ exports.updatePackage = async (req, res) => {
     }
 };
 
-// DELETE /api/packages/:id
 exports.deletePackage = async (req, res) => {
     try {
         const userId = req.user._id;
@@ -489,36 +485,6 @@ exports.deletePackage = async (req, res) => {
     }
 };
 
-// GET /api/packages/notifications/all
-exports.getAllNotifications = async (req, res) => {
-    try {
-        const userId = req.user._id;
-
-        const packages = await Package.find({
-            userId,
-            type: "notifications",
-            isEnabled: true
-        }).sort({ updatedAt: -1 });
-
-        const result = packages.flatMap((pack) =>
-            (pack.notifications || []).map((item) => ({
-                ...item.toObject(),
-                packageId: pack._id,
-                packageTitle: pack.title,
-                tripId: pack.tripId
-            }))
-        );
-
-        result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-        return res.json(result);
-    } catch (err) {
-        console.error("Get all notifications error:", err);
-        return res.status(500).json({ message: "Chyba při načítání notifikací." });
-    }
-};
-
-// PUT /api/packages/:id/notifications/:notificationId/read
 exports.markNotificationAsRead = async (req, res) => {
     try {
         const userId = req.user._id;
