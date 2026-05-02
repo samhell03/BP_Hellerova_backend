@@ -18,5 +18,7 @@ router.post("/request-password-change-code", auth, authController.requestPasswor
 router.post("/confirm-password-change", auth, authController.confirmPasswordChange);
 
 router.put("/update-name", auth, authController.updateName);
+router.post("/forgot-password", authController.forgotPassword);
+router.post("/reset-password", authController.resetPassword);
 
 module.exports = router;

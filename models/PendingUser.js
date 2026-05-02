@@ -8,6 +8,7 @@ const PendingUserSchema = new mongoose.Schema({
         minlength: 2,
         maxlength: 50
     },
+
     email: {
         type: String,
         required: true,
@@ -15,22 +16,43 @@ const PendingUserSchema = new mongoose.Schema({
         trim: true,
         lowercase: true
     },
+
     passwordHash: {
         type: String,
         required: true
     },
+
     verificationCodeHash: {
         type: String,
         required: true
     },
+
     verificationCodeExpires: {
         type: Date,
         required: true
     },
+
+    personalDataConsent: {
+        type: Boolean,
+        required: true,
+        default: false
+    },
+
+    personalDataConsentAt: {
+        type: Date,
+        default: null
+    },
+
+    personalDataConsentVersion: {
+        type: String,
+        required: true,
+        default: "2026-04-12"
+    },
+
     createdAt: {
         type: Date,
         default: Date.now,
-        expires: 60 * 60 * 24
+        expires: 60 * 60 * 24 
     }
 });
 

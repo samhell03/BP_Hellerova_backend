@@ -4,16 +4,6 @@ const Trip = require("../models/Trip");
 
 const ALLOWED_LABEL_COLORS = ["default", "blue", "green", "yellow", "red", "purple"];
 
-function normalizeChecklistItems(items) {
-    if (!Array.isArray(items)) return [];
-
-    return items
-        .filter((item) => item && typeof item.text === "string" && item.text.trim())
-        .map((item) => ({
-            text: item.text.trim(),
-            checked: Boolean(item.checked)
-        }));
-}
 
 async function ensureTripOwnership(tripId, userId) {
     if (!mongoose.Types.ObjectId.isValid(tripId)) {
@@ -60,7 +50,6 @@ exports.createNote = async (req, res) => {
             content = "",
             labelColor = "default",
             isPinned = false,
-            checklistItems = []
         } = req.body;
 
         const trip = await ensureTripOwnership(tripId, userId);
@@ -88,9 +77,6 @@ exports.createNote = async (req, res) => {
         if (!ALLOWED_LABEL_COLORS.includes(labelColor)) {
             return res.status(400).json({ message: "Neplatná barva štítku." });
         }
-
-        const normalizedChecklistItems = normalizeChecklistItems(checklistItems);
-
         const created = await Note.create({
             userId,
             tripId,
@@ -98,7 +84,6 @@ exports.createNote = async (req, res) => {
             content: content.trim(),
             labelColor,
             isPinned: Boolean(isPinned),
-            checklistItems: normalizedChecklistItems
         });
 
         return res.status(201).json(created);
@@ -127,7 +112,6 @@ exports.updateNote = async (req, res) => {
             content,
             labelColor,
             isPinned,
-            checklistItems
         } = req.body;
 
         const note = await Note.findOne({ _id: id, userId });
@@ -172,10 +156,6 @@ exports.updateNote = async (req, res) => {
             note.isPinned = Boolean(isPinned);
         }
 
-        if (checklistItems !== undefined) {
-            note.checklistItems = normalizeChecklistItems(checklistItems);
-        }
-
         await note.save();
 
         return res.json(note);
@@ -211,36 +191,6 @@ exports.deleteNote = async (req, res) => {
         console.error("Delete note error:", err);
         return res.status(500).json({
             message: "Chyba serveru při mazání poznámky."
-        });
-    }
-};
-
-// PUT /api/notes/:id/checklist/:itemId/toggle
-exports.toggleChecklistItem = async (req, res) => {
-    try {
-        const userId = req.user._id;
-        const { id, itemId } = req.params;
-
-        const note = await Note.findOne({ _id: id, userId });
-
-        if (!note) {
-            return res.status(404).json({ message: "Poznámka nebyla nalezena." });
-        }
-
-        const item = note.checklistItems.id(itemId);
-
-        if (!item) {
-            return res.status(404).json({ message: "Položka checklistu nebyla nalezena." });
-        }
-
-        item.checked = !item.checked;
-        await note.save();
-
-        return res.json(note);
-    } catch (err) {
-        console.error("Toggle checklist item error:", err);
-        return res.status(500).json({
-            message: "Chyba serveru při přepínání checklist položky."
         });
     }
 };

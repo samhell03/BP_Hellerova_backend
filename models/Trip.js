@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+ï»¿const mongoose = require("mongoose");
 
 const MIN_TRIP_YEAR = 1950;
 const MAX_TRIP_YEAR = 2100;
@@ -71,7 +71,7 @@ const TripSchema = new mongoose.Schema({
         required: true,
         validate: {
             validator: isDateInAllowedRange,
-            message: `Datum odjezdu musí být v rozmezí let ${MIN_TRIP_YEAR} až ${MAX_TRIP_YEAR}.`
+            message: `Datum odjezdu musÃ­ bÃ½t v rozmezÃ­ let ${MIN_TRIP_YEAR} aÅ¾ ${MAX_TRIP_YEAR}.`
         }
     },
 
@@ -80,14 +80,14 @@ const TripSchema = new mongoose.Schema({
         required: true,
         validate: {
             validator: isDateInAllowedRange,
-            message: `Datum návratu musí být v rozmezí let ${MIN_TRIP_YEAR} až ${MAX_TRIP_YEAR}.`
+            message: `Datum nÃ¡vratu musÃ­ bÃ½t v rozmezÃ­ let ${MIN_TRIP_YEAR} aÅ¾ ${MAX_TRIP_YEAR}.`
         }
     },
 
     createdAt: {
         type: Date,
         default: Date.now
-    }
+    },
 });
 
 TripSchema.pre("validate", function () {
@@ -103,7 +103,7 @@ TripSchema.pre("validate", function () {
     }
 
     if (start > end) {
-        this.invalidate("endDate", "Datum od nemùže být po datu do.");
+        this.invalidate("endDate", "Datum od nemÅ¯Å¾e bÃ½t po datu do.");
         return;
     }
 
@@ -112,7 +112,7 @@ TripSchema.pre("validate", function () {
     if (diffDays > MAX_TRIP_DURATION_DAYS) {
         this.invalidate(
             "endDate",
-            `Výlet mùže trvat maximálnì ${MAX_TRIP_DURATION_DAYS} dní.`
+            `VÃ½let mÅ¯Å¾e trvat maximÃ¡lnÄ› ${MAX_TRIP_DURATION_DAYS} dnÃ­.`
         );
     }
 });

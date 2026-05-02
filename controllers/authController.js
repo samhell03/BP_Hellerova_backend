@@ -10,6 +10,7 @@ const {
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const PendingUser = require("../models/PendingUser");
+const PERSONAL_DATA_CONSENT_VERSION = "2026-04-12";
 
 function generateToken(user) {
     return jwt.sign(
@@ -57,11 +58,17 @@ function generateVerificationExpiry() {
 
 exports.register = async (req, res) => {
     try {
-        const { userName, email, password } = req.body;
+        const { userName, email, password, personalDataConsent } = req.body;
 
         if (!userName || !email || !password) {
             return res.status(400).json({
                 message: "Vyplň všechna pole."
+            });
+        }
+
+        if (personalDataConsent !== true) {
+            return res.status(400).json({
+                message: "Pro vytvoření účtu je nutné udělit souhlas se zpracováním osobních údajů."
             });
         }
 
@@ -129,6 +136,9 @@ exports.register = async (req, res) => {
                 passwordHash,
                 verificationCodeHash,
                 verificationCodeExpires,
+                personalDataConsent: true,
+                personalDataConsentAt: new Date(),
+                personalDataConsentVersion: PERSONAL_DATA_CONSENT_VERSION,
                 createdAt: new Date()
             },
             {
@@ -214,7 +224,10 @@ exports.verifyRegistrationCode = async (req, res) => {
             userName: pendingUser.userName,
             email: pendingUser.email,
             password: pendingUser.passwordHash,
-            authProvider: "local"
+            authProvider: "local",
+            personalDataConsent: pendingUser.personalDataConsent,
+            personalDataConsentAt: pendingUser.personalDataConsentAt,
+            personalDataConsentVersion: pendingUser.personalDataConsentVersion
         });
 
         await PendingUser.deleteOne({ _id: pendingUser._id });
@@ -665,6 +678,145 @@ exports.confirmPasswordChange = async (req, res) => {
         console.error("Confirm password change error:", error);
         return res.status(500).json({
             message: "Nepodařilo se potvrdit změnu hesla."
+        });
+    }
+};
+
+exports.forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email || !email.trim()) {
+            return res.status(400).json({
+                message: "Zadej e-mail."
+            });
+        }
+
+        const normalizedEmail = email.trim().toLowerCase();
+
+        const user = await User.findOne({ email: normalizedEmail });
+
+        if (!user) {
+            return res.status(404).json({
+                message: "Uživatel s tímto e-mailem nebyl nalezen."
+            });
+        }
+
+        if (!user.password) {
+            return res.status(400).json({
+                message: "Tento účet používá přihlášení přes Google."
+            });
+        }
+
+        const verificationCode = generateSixDigitCode();
+
+        user.passwordChangeCodeHash = hashVerificationCode(verificationCode);
+        user.passwordChangeCodeExpires = generateVerificationExpiry();
+        user.pendingPasswordHash = null;
+
+        await user.save();
+
+        await sendPasswordChangeCode(user.email, verificationCode, user.userName);
+
+        return res.status(200).json({
+            message: "Ověřovací kód byl odeslán na e-mail."
+        });
+    } catch (error) {
+        console.error("Forgot password error:", error);
+        return res.status(500).json({
+            message: "Nepodařilo se odeslat ověřovací kód."
+        });
+    }
+};
+
+exports.resetPassword = async (req, res) => {
+    try {
+        const { email, code, newPassword } = req.body;
+
+        if (!email || !code || !newPassword) {
+            return res.status(400).json({
+                message: "Vyplň e-mail, kód i nové heslo."
+            });
+        }
+
+        const normalizedEmail = email.trim().toLowerCase();
+        const normalizedCode = String(code).trim();
+
+        if (!/^\d{6}$/.test(normalizedCode)) {
+            return res.status(400).json({
+                message: "Ověřovací kód musí mít 6 číslic."
+            });
+        }
+
+        const passwordRuleError = validatePasswordRules(newPassword);
+
+        if (passwordRuleError) {
+            return res.status(400).json({
+                message: passwordRuleError
+            });
+        }
+
+        const user = await User.findOne({ email: normalizedEmail });
+
+        if (!user) {
+            return res.status(404).json({
+                message: "Uživatel nebyl nalezen."
+            });
+        }
+
+        if (!user.password) {
+            return res.status(400).json({
+                message: "Tento účet používá přihlášení přes Google."
+            });
+        }
+
+        if (!user.passwordChangeCodeHash || !user.passwordChangeCodeExpires) {
+            return res.status(400).json({
+                message: "Nebyla nalezena žádná žádost o obnovu hesla."
+            });
+        }
+
+        if (user.passwordChangeCodeExpires.getTime() < Date.now()) {
+            user.passwordChangeCodeHash = null;
+            user.passwordChangeCodeExpires = null;
+            user.pendingPasswordHash = null;
+            await user.save();
+
+            return res.status(400).json({
+                message: "Platnost ověřovacího kódu vypršela. Požádej o nový kód."
+            });
+        }
+
+        const incomingCodeHash = hashVerificationCode(normalizedCode);
+
+        if (incomingCodeHash !== user.passwordChangeCodeHash) {
+            return res.status(400).json({
+                message: "Ověřovací kód není správný."
+            });
+        }
+
+        const isSamePassword = await bcrypt.compare(newPassword, user.password);
+
+        if (isSamePassword) {
+            return res.status(400).json({
+                message: "Nové heslo nesmí být stejné jako současné."
+            });
+        }
+
+        user.password = await bcrypt.hash(newPassword, 10);
+        user.passwordChangeCodeHash = null;
+        user.passwordChangeCodeExpires = null;
+        user.pendingPasswordHash = null;
+
+        await user.save();
+
+        return res.status(200).json({
+            message: "Heslo bylo úspěšně obnoveno."
+        });
+    } catch (error) {
+        console.error("Reset password error:", error);
+        return res.status(500).json({
+            message: "Nepodařilo se obnovit heslo."
         });
     }
 };

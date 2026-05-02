@@ -39,8 +39,8 @@ app.use((req, res, next) => {
 // ===== DB =====
 mongoose
     .connect(MONGO_URL)
-    .then(() => console.log("✅ Úspěšně připojeno k MongoDB"))
-    .catch((err) => console.error("❌ Chyba připojení k DB:", err));
+    .then(() => console.log("Úspěšně připojeno k MongoDB"))
+    .catch((err) => console.error("Chyba připojení k DB:", err));
 
 // ===== ROUTES =====
 app.get("/", (req, res) => {
@@ -56,5 +56,5 @@ app.use("/api/notifications", notificationRoutes);
 
 // ===== START =====
 app.listen(PORT, "0.0.0.0", () => {
-    console.log(`✅ Server nastartován na http://127.0.0.1:${PORT}`);
+    console.log(`Server nastartován na http://127.0.0.1:${PORT}`);
 });

@@ -3,7 +3,6 @@ const axios = require("axios");
 const Package = require("../models/Package");
 const Trip = require("../models/Trip");
 const Notification = require("../models/Notification");
-const { getEmergencyContacts } = require("../data/emergencyContacts");
 
 function createPackingItems(items = []) {
     return items.map((text) => ({
@@ -54,8 +53,6 @@ function createTemplatePayload(type, trip) {
             return {
                 title: "Počasí",
                 type: "weather",
-                sourceType: "template",
-                visibility: "private",
                 templateKey: "weather",
                 meta: {}
             };
@@ -64,8 +61,6 @@ function createTemplatePayload(type, trip) {
             return {
                 title: "Notifikace",
                 type: "notifications",
-                sourceType: "template",
-                visibility: "private",
                 templateKey: "notifications",
                 meta: {
                     thresholds: {
@@ -77,26 +72,10 @@ function createTemplatePayload(type, trip) {
                 }
             };
 
-        case "contacts":
-            return {
-                title: "Kontakty",
-                type: "contacts",
-                sourceType: "template",
-                visibility: "private",
-                templateKey: "contacts",
-                contacts: [
-                    ...getEmergencyContacts(trip.countryCode),
-                    { label: "Ambasáda", value: "" },
-                    { label: "Pojišťovna", value: "" },
-                    { label: "Nouzový kontakt", value: "" }
-                ]
-            };
-
         case "packing":
             return {
                 title: "Zabalit",
                 type: "packing",
-                sourceType: "template",
                 visibility: "private",
                 templateKey: "packing",
                 packingItems: getPackingItemsForTrip(trip),
@@ -357,7 +336,7 @@ async function createPackagesForTrip(userId, tripId, selectedPackages = []) {
         throw new Error("Výlet nebyl nalezen pro vytvoření balíčků.");
     }
 
-    const allowedTypes = ["weather", "notifications", "contacts", "packing"];
+    const allowedTypes = ["weather", "notifications", "packing"];
     const validTypes = [...new Set(selectedPackages)].filter((type) =>
         allowedTypes.includes(type)
     );
@@ -443,7 +422,7 @@ exports.generatePackageAlerts = async (req, res) => {
 exports.updatePackage = async (req, res) => {
     try {
         const userId = req.user._id;
-        const { title, visibility, contacts, packingItems, notifications, meta } = req.body;
+        const { title, packingItems, notifications, meta } = req.body;
 
         const pack = await Package.findOne({ _id: req.params.id, userId });
         if (!pack) {
@@ -451,8 +430,6 @@ exports.updatePackage = async (req, res) => {
         }
 
         if (typeof title === "string") pack.title = title.trim();
-        if (visibility === "private" || visibility === "shared") pack.visibility = visibility;
-        if (Array.isArray(contacts)) pack.contacts = contacts;
         if (Array.isArray(packingItems)) pack.packingItems = packingItems;
         if (Array.isArray(notifications)) pack.notifications = notifications;
         if (meta && typeof meta === "object") pack.meta = meta;

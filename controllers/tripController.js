@@ -1,11 +1,12 @@
 ﻿const Trip = require("../models/Trip");
 const { createPackagesForTrip } = require("./packageController");
 const Package = require("../models/Package");
-const { getEmergencyContacts } = require("../data/emergencyContacts");
+const Note = require("../models/Note");
 
 const MIN_TRIP_YEAR = 1950;
 const MAX_TRIP_YEAR = 2100;
 const MAX_TRIP_DURATION_DAYS = 365;
+
 
 function normalizeCoordinate(value) {
     if (value === null || value === undefined || value === "") {
@@ -372,17 +373,6 @@ exports.updateTrip = async (req, res) => {
                     generatedFromCategory: true,
                     regeneratedAfterTripEdit: true
                 };
-
-                await pack.save();
-            }
-
-            if (pack.type === "contacts") {
-                pack.contacts = [
-                    ...getEmergencyContacts(updated.countryCode),
-                    { label: "Ambasáda", value: "" },
-                    { label: "Pojišťovna", value: "" },
-                    { label: "Nouzový kontakt", value: "" }
-                ];
 
                 await pack.save();
             }

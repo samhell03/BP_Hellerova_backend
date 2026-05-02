@@ -29,6 +29,21 @@ const UserSchema = new mongoose.Schema({
         enum: ["local", "google"],
         default: "local"
     },
+    personalDataConsent: {
+        type: Boolean,
+        default: false
+    },
+
+    personalDataConsentAt: {
+        type: Date,
+        default: null
+    },
+
+    personalDataConsentVersion: {
+        type: String,
+        default: null
+    },
+
     avatar: {
         type: String,
         default: null
