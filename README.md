@@ -203,10 +203,7 @@ Backend je možné nasadit například na službu Render.
 ---
 
 ## Odkazy
-
-- Backend: https://github.com/samhell03/BP_Hellerova_backend
-- Frontend: (doplň odkaz)
-- API: (doplň URL z Renderu)
+https://muj-planovac-vyletu.vercel.app
 
 ---
 
