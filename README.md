@@ -61,12 +61,12 @@ V kořenové složce vytvoř soubor `.env`:
 PORT=5000
 MONGO_URL=mongodb://127.0.0.1:27017/travelApp
 FRONTEND_URL=http://127.0.0.1:5173
-JWT_SECRET=nejake_tajne_heslo
+JWT_SECRET=heslo
 
-GOOGLE_CLIENT_ID=tvuj_google_client_id
+GOOGLE_CLIENT_ID=_google_client_id
 
-BREVO_API_KEY=tvuj_brevo_api_klic
-BREVO_SENDER_EMAIL=tvuj_email
+BREVO_API_KEY=brevo_api_klic
+BREVO_SENDER_EMAIL=email
 ```
 
 ⚠️ Soubor `.env` se nikdy neukládá do repozitáře.
