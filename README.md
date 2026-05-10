@@ -106,6 +106,12 @@ Pro spuštění projektu je potřeba:
 
 ## Instalace projektu
 
+### 1. Naklonování repozitáře
+
+```bash
+git clone https://github.com/samhell03/BP_Hellerova_backend.git
+```
+
 ### 2. Přechod do složky
 
 ```bash
