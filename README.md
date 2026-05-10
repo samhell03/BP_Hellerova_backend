@@ -104,7 +104,7 @@ Pro spuštění projektu je potřeba:
 
 ---
 
-## 📦 Instalace projektu
+## Instalace projektu
 
 ### 2. Přechod do složky
 
@@ -120,7 +120,7 @@ npm install
 
 ---
 
-## ⚙️ Proměnné prostředí
+## Proměnné prostředí
 
 V kořenové složce vytvoř soubor `.env`.
 
