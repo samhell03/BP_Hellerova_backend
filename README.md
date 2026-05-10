@@ -12,7 +12,7 @@ Aplikace je navržena jako **klient–server systém**, kde backend komunikuje s
 
 ## Online aplikace
 
-Frontend aplikace je dostupný zde:
+Aplikace je dostupná na tomto odkaze:
 
 🔗 https://muj-planovac-vyletu.vercel.app/
 
@@ -72,23 +72,6 @@ Backend implementuje několik bezpečnostních mechanismů:
 
 ---
 
-## Architektura
-
-Aplikace je rozdělena do tří hlavních vrstev:
-
-- frontend (React)
-- backend (Node.js + Express)
-- databáze (MongoDB)
-
-Backend:
-
-- zpracovává požadavky z klienta
-- provádí validaci dat
-- komunikuje s databází
-- zajišťuje autentizaci a autorizaci
-
----
-
 ## Požadavky na prostředí
 
 Pro spuštění projektu je potřeba:
@@ -128,7 +111,7 @@ npm install
 
 ## Proměnné prostředí
 
-V kořenové složce vytvoř soubor `.env`.
+V kořenové složce vytvořte soubor `.env`.
 
 ### Příklad obsahu
 
