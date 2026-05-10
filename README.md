@@ -1,51 +1,118 @@
 # Aplikace pro cestovatele – backend
+![Node.js](https://img.shields.io/badge/Node.js-Backend-339933?logo=node.js&logoColor=white)
+![Express](https://img.shields.io/badge/Express.js-API-black?logo=express&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-Database-47A248?logo=mongodb&logoColor=white)
 
-Backendová část webové aplikace TravelApp slouží jako serverová logika pro správu uživatelů, výletů a souvisejících dat. Poskytuje REST API, které komunikuje s frontendovou částí aplikace.
+Backendová část webové aplikace vytvořené v rámci bakalářské práce.  
+Zajišťuje aplikační logiku, správu dat, autentizaci uživatelů a poskytuje REST API pro frontendovou část aplikace.
 
-Projekt je vytvořen v prostředí Node.js s využitím frameworku Express.js a databáze MongoDB.
+Aplikace je navržena jako **klient–server systém**, kde backend komunikuje s frontendem pomocí HTTP požadavků a dat ve formátu JSON.
+
+---
+
+## Online aplikace
+
+Frontend aplikace je dostupný zde:
+
+🔗 https://muj-planovac-vyletu.vercel.app/
+
+---
+
+## Dokumentace
+
+Podrobná uživatelská dokumentace aplikace je dostupná zde:
+
+🔗 https://
 
 ---
 
 ## Použité technologie
 
-- Node.js
-- Express.js
-- MongoDB + Mongoose
-- JSON Web Token (JWT)
-- bcrypt
-- dotenv
-- cors
-- axios
-- google-auth-library
-- Brevo (odesílání e-mailů)
+- [Node.js](https://nodejs.org/)
+- [Express.js](https://expressjs.com/)
+- [MongoDB](https://www.mongodb.com/)
+- [Mongoose](https://mongoosejs.com/)
+- [JSON Web Token (JWT)](https://jwt.io/)
+- [bcrypt](https://www.npmjs.com/package/bcrypt)
+- [dotenv](https://www.npmjs.com/package/dotenv)
+- [cors](https://www.npmjs.com/package/cors)
+- [axios](https://axios-http.com/)
+- [google-auth-library](https://www.npmjs.com/package/google-auth-library)
+- [Brevo](https://www.brevo.com/) – e-mailové služby
 
 ---
 
-## Požadavky
+## Hlavní funkcionalita
 
-Pro spuštění projektu je potřeba mít nainstalováno:
-
-- Node.js
-- npm
-- MongoDB (lokálně nebo MongoDB Atlas)
+- registrace uživatele s ověřením e-mailu (ověřovací kód)
+- přihlášení pomocí e-mailu a hesla
+- přihlášení pomocí Google účtu (OAuth)
+- správa uživatelské relace pomocí JWT
+- změna hesla s ověřovacím kódem
+- obnova zapomenutého hesla
+- správa výletů (CRUD operace)
+- správa balíčků (počasí, notifikace, checklist)
+- práce s poznámkami
+- systém notifikací
+- integrace externích API (např. počasí)
+- odesílání e-mailů (ověřovací kódy)
 
 ---
 
-## Instalace
+## Bezpečnost
 
-Naklonování repozitáře:
+Backend implementuje několik bezpečnostních mechanismů:
 
-```bash
-git clone https://github.com/samhell03/BP_Hellerova_backend.git
-```
+- hashování hesel pomocí bcrypt
+- autentizace pomocí JWT tokenů
+- ochrana endpointů pomocí middleware
+- ověřování e-mailu při registraci
+- 2FA princip pomocí jednorázových kódů
+- oddělení Google účtů (bez správy hesla)
 
-Přechod do složky projektu:
+---
+
+## Architektura
+
+Aplikace je rozdělena do tří hlavních vrstev:
+
+- frontend (React)
+- backend (Node.js + Express)
+- databáze (MongoDB)
+
+Backend:
+
+- zpracovává požadavky z klienta
+- provádí validaci dat
+- komunikuje s databází
+- zajišťuje autentizaci a autorizaci
+
+---
+
+## Požadavky na prostředí
+
+Pro spuštění projektu je potřeba:
+
+- [Node.js](https://nodejs.org/) (doporučeno verze 18+)
+- [npm](https://www.npmjs.com/)
+- [MongoDB](https://www.mongodb.com/) (lokálně nebo Atlas)
+- [Git](https://git-scm.com/)
+
+### Doporučené prostředí
+
+- [Visual Studio Code](https://code.visualstudio.com/)
+
+---
+
+## 📦 Instalace projektu
+
+### 2. Přechod do složky
 
 ```bash
 cd BP_Hellerova_backend
 ```
 
-Instalace závislostí:
+### 3. Instalace závislostí
 
 ```bash
 npm install
@@ -53,56 +120,67 @@ npm install
 
 ---
 
-## Konfigurace (.env)
+## ⚙️ Proměnné prostředí
 
-V kořenové složce vytvoř soubor `.env`:
+V kořenové složce vytvoř soubor `.env`.
+
+### Příklad obsahu
 
 ```env
 PORT=5000
 MONGO_URL=mongodb://127.0.0.1:27017/travelApp
 FRONTEND_URL=http://127.0.0.1:5173
-JWT_SECRET=heslo
+JWT_SECRET=secret
 
-GOOGLE_CLIENT_ID=_google_client_id
+GOOGLE_CLIENT_ID=google_client_id
 
-BREVO_API_KEY=brevo_api_klic
+BREVO_API_KEY=brevo_api_key
 BREVO_SENDER_EMAIL=email
 ```
 
-⚠️ Soubor `.env` se nikdy neukládá do repozitáře.
+### Význam proměnných
+
+- `PORT` – port serveru
+- `MONGO_URL` – připojení k databázi
+- `FRONTEND_URL` – povolený frontend (CORS)
+- `JWT_SECRET` – klíč pro podepisování JWT tokenů
+- `GOOGLE_CLIENT_ID` – Google OAuth Client ID
+- `BREVO_API_KEY` – API klíč služby Brevo pro odesílání e-mailů
+- `BREVO_SENDER_EMAIL` – e-mailová adresa odesílatele
 
 ---
 
-## Spuštění projektu
+### Důležité
 
-Vývojový režim:
+Soubor `.env` není součástí repozitáře a nesmí obsahovat citlivé údaje ve veřejném kódu.
+
+---
+
+## Spuštění aplikace
+
+### Vývojový režim
 
 ```bash
 npm run dev
 ```
 
-Produkční režim:
+### Produkční režim
 
 ```bash
 npm start
-```
-
-Backend poběží na:
-
-```
-http://127.0.0.1:5000
 ```
 
 ---
 
 ## Struktura projektu
 
-```
-controllers/   logika aplikace
+```txt
+controllers/   aplikační logika
 models/        databázové modely
 routes/        API endpointy
-middleware/    autentizace (JWT)
-services/      pomocné služby (např. email)
+middleware/    autentizace pomocí JWT
+services/      služba pro odesílání e-mailů
+utils/         pomocné funkce
 app.js         vstupní bod aplikace
 ```
 
@@ -110,9 +188,9 @@ app.js         vstupní bod aplikace
 
 ## Autentizace
 
-Některé endpointy vyžadují JWT token:
+Chráněné endpointy vyžadují JWT token ve tvaru:
 
-```
+```txt
 Authorization: Bearer <token>
 ```
 
@@ -120,94 +198,75 @@ Authorization: Bearer <token>
 
 ## API endpointy
 
-Základní URL:
-
-```
-http://127.0.0.1:5000/api
-```
-
----
-
 ### Auth
 
-| metoda | endpoint | popis |
-|--------|----------|------|
-| POST | /api/auth/register | registrace |
-| POST | /api/auth/login | přihlášení |
-| POST | /api/auth/google | přihlášení přes Google |
-| GET | /api/auth/me | aktuální uživatel |
-| PUT | /api/auth/change-password | změna hesla |
-| POST | /api/auth/forgot-password | zapomenuté heslo |
-| POST | /api/auth/reset-password | reset hesla |
-
----
+| Metoda | Endpoint | Popis |
+|--------|----------|-------|
+| POST | `/api/auth/register` | registrace uživatele |
+| POST | `/api/auth/login` | přihlášení uživatele |
+| POST | `/api/auth/google` | přihlášení přes Google |
+| GET | `/api/auth/me` | aktuální přihlášený uživatel |
+| PUT | `/api/auth/change-password` | změna hesla |
+| POST | `/api/auth/forgot-password` | zapomenuté heslo |
+| POST | `/api/auth/reset-password` | reset hesla |
 
 ### Trips
 
-| metoda | endpoint | popis |
-|--------|----------|------|
-| GET | /api/trips | všechny výlety |
-| POST | /api/trips | vytvoření výletu |
-| GET | /api/trips/:id | detail |
-| PUT | /api/trips/:id | úprava |
-| DELETE | /api/trips/:id | smazání |
-
----
+| Metoda | Endpoint | Popis |
+|--------|----------|-------|
+| GET | `/api/trips` | seznam výletů |
+| POST | `/api/trips` | vytvoření výletu |
+| GET | `/api/trips/:id` | detail výletu |
+| PUT | `/api/trips/:id` | úprava výletu |
+| DELETE | `/api/trips/:id` | smazání výletu |
 
 ### Packages
 
-| metoda | endpoint | popis |
-|--------|----------|------|
-| GET | /api/packages/trip/:tripId | balíčky |
-| POST | /api/packages/import-template | import |
-| PUT | /api/packages/:id | úprava |
-| DELETE | /api/packages/:id | smazání |
-
----
+| Metoda | Endpoint | Popis |
+|--------|----------|-------|
+| GET | `/api/packages/trip/:tripId` | balíčky k výletu |
+| POST | `/api/packages/import-template` | import balíčku |
+| PUT | `/api/packages/:id` | úprava balíčku |
+| DELETE | `/api/packages/:id` | smazání balíčku |
 
 ### Notes
 
-| metoda | endpoint | popis |
-|--------|----------|------|
-| GET | /api/notes/trip/:tripId | poznámky |
-| POST | /api/notes/trip/:tripId | vytvoření |
-| PUT | /api/notes/:id | úprava |
-| DELETE | /api/notes/:id | smazání |
-
----
+| Metoda | Endpoint | Popis |
+|--------|----------|-------|
+| GET | `/api/notes/trip/:tripId` | poznámky k výletu |
+| POST | `/api/notes/trip/:tripId` | vytvoření poznámky |
+| PUT | `/api/notes/:id` | úprava poznámky |
+| DELETE | `/api/notes/:id` | smazání poznámky |
 
 ### Notifications
 
-| metoda | endpoint | popis |
-|--------|----------|------|
-| GET | /api/notifications | notifikace |
-| PUT | /api/notifications/:id/read | označit jako přečtené |
-
----
+| Metoda | Endpoint | Popis |
+|--------|----------|-------|
+| GET | `/api/notifications` | seznam notifikací |
+| PUT | `/api/notifications/:id/read` | označení notifikace jako přečtené |
 
 ### Countries
 
-| metoda | endpoint | popis |
-|--------|----------|------|
-| GET | /api/countries | seznam zemí |
-| GET | /api/countries/cities/search | města |
+| Metoda | Endpoint | Popis |
+|--------|----------|-------|
+| GET | `/api/countries` | seznam zemí |
+| GET | `/api/countries/cities/search` | vyhledávání měst |
 
 ---
 
-## Nasazení
+## Frontend
 
-Backend je možné nasadit například na službu Render.
+Tento repozitář obsahuje pouze backendovou část aplikace.
 
-⚠️ Při použití free verze může dojít k uspání serveru. První požadavek pak může trvat déle.
-
----
-
-## Odkazy
-https://muj-planovac-vyletu.vercel.app
+Frontendová část aplikace je dostupná zde: (https://github.com/samhell03/BP_Hellerova_frontend)
 
 ---
 
-## Autor
+## Poznámka k provozu
 
-Samira Hellerová  
+Backend je nasazen na free hostingu, z tohoto důvodu může být při prvním požadavku delší odezva. Důvodem je tzv. „probuzení serveru“ po delší době neaktivity.
+
+---
+
+**Samira Hellerová – TUL 2026**  
 Bakalářská práce
