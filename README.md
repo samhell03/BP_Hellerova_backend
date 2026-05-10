@@ -22,7 +22,7 @@ Aplikace je dostupná na tomto odkaze:
 
 Podrobná uživatelská dokumentace aplikace je dostupná zde:
 
-🔗 https://
+https://samhell03.github.io/PDO-dokumentace-final/
 
 ---
 
