@@ -1,4 +1,4 @@
-# Backend – TravelApp
+# Aplikace pro cestovatele – backend
 
 Backendová část webové aplikace TravelApp slouží jako serverová logika pro správu uživatelů, výletů a souvisejících dat. Poskytuje REST API, které komunikuje s frontendovou částí aplikace.
 
