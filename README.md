@@ -186,7 +186,6 @@ models/        databázové modely
 routes/        API endpointy
 middleware/    autentizace pomocí JWT
 services/      služba pro odesílání e-mailů
-utils/         pomocné funkce
 app.js         vstupní bod aplikace
 ```
 
