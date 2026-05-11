@@ -14,7 +14,6 @@ async function ensureTripOwnership(tripId, userId) {
     return trip;
 }
 
-// GET /api/notes/trip/:tripId
 exports.getNotesByTrip = async (req, res) => {
     try {
         const userId = req.user._id;
@@ -40,7 +39,6 @@ exports.getNotesByTrip = async (req, res) => {
     }
 };
 
-// POST /api/notes/trip/:tripId
 exports.createNote = async (req, res) => {
     try {
         const userId = req.user._id;
@@ -102,7 +100,6 @@ exports.createNote = async (req, res) => {
     }
 };
 
-// PUT /api/notes/:id
 exports.updateNote = async (req, res) => {
     try {
         const userId = req.user._id;
@@ -174,7 +171,6 @@ exports.updateNote = async (req, res) => {
     }
 };
 
-// DELETE /api/notes/:id
 exports.deleteNote = async (req, res) => {
     try {
         const userId = req.user._id;

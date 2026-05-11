@@ -13,12 +13,12 @@ const notificationRoutes = require("./routes/notificationRoutes");
 
 const app = express();
 
-// ===== CONFIG =====
+// CONFIG 
 const PORT = process.env.PORT || 5000;
 const MONGO_URL = process.env.MONGO_URL || "mongodb://127.0.0.1:27017/travelApp";
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://127.0.0.1:5173";
 
-// ===== MIDDLEWARE =====
+// MIDDLEWARE 
 app.use(
     cors({
         origin: [FRONTEND_URL, "http://localhost:5173", "http://127.0.0.1:5173"],
@@ -30,19 +30,18 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// důležité pro správnou diakritiku
 app.use((req, res, next) => {
     res.setHeader("Content-Type", "application/json; charset=utf-8");
     next();
 });
 
-// ===== DB =====
+// DB 
 mongoose
     .connect(MONGO_URL)
     .then(() => console.log("Úspěšně připojeno k MongoDB"))
     .catch((err) => console.error("Chyba připojení k DB:", err));
 
-// ===== ROUTES =====
+// ROUTES 
 app.get("/", (req, res) => {
     res.send("Backend pro TravelApp běží.");
 });
@@ -54,7 +53,7 @@ app.use("/api/packages", packageRoutes);
 app.use("/api/notes", noteRoutes);
 app.use("/api/notifications", notificationRoutes);
 
-// ===== START =====
+// START 
 app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server nastartován na http://127.0.0.1:${PORT}`);
 });

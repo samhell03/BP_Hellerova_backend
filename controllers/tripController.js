@@ -216,7 +216,6 @@ function getPackingItemsForTrip(trip) {
     return createPackingItems(uniqueItems);
 }
 
-// POST /api/trips
 exports.createTrip = async (req, res) => {
     try {
         const userId = req.user._id;
@@ -230,8 +229,8 @@ exports.createTrip = async (req, res) => {
             cityLng,
             startDate,
             endDate,
-            category,            // ??
-            selectedPackages     // ??
+            category,            
+            selectedPackages    
         } = req.body;
 
         const validationError = validateTripPayload(req.body);
@@ -251,18 +250,16 @@ exports.createTrip = async (req, res) => {
             startDate,
             endDate,
 
-            category: category || "general" // ?? fallback
+            category: category || "general" 
         });
 
         await newTrip.save();
 
-        // ?? vytvoření balíčků podle výběru
         if (selectedPackages && Array.isArray(selectedPackages) && selectedPackages.length > 0) {
             try {
                 await createPackagesForTrip(userId, newTrip._id, selectedPackages);
             } catch (pkgErr) {
                 console.error("Package creation error:", pkgErr);
-                // nechceme shodit celý request kvůli balíčkům
             }
         }
 
@@ -283,7 +280,6 @@ exports.createTrip = async (req, res) => {
     }
 };
 
-// GET /api/trips
 exports.getMyTrips = async (req, res) => {
     try {
         const userId = req.user._id;
@@ -298,7 +294,6 @@ exports.getMyTrips = async (req, res) => {
     }
 };
 
-// GET /api/trips/:id
 exports.getTripById = async (req, res) => {
     try {
         const userId = req.user._id;
@@ -317,7 +312,6 @@ exports.getTripById = async (req, res) => {
     }
 };
 
-// PUT /api/trips/:id
 exports.updateTrip = async (req, res) => {
     try {
         const userId = req.user._id;
@@ -350,7 +344,7 @@ exports.updateTrip = async (req, res) => {
                 cityLng: normalizeCoordinate(cityLng),
                 startDate,
                 endDate,
-                category: category || "general" // ??
+                category: category || "general" 
             },
             { returnDocument: "after", runValidators: true }
         );
@@ -399,7 +393,6 @@ exports.updateTrip = async (req, res) => {
     }
 };
 
-// DELETE /api/trips/:id
 exports.deleteTrip = async (req, res) => {
     try {
         const userId = req.user._id;

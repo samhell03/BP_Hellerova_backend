@@ -49,10 +49,10 @@ async function sendPasswordChangeCode(email, code, userName) {
         subject: "Ověřovací kód pro změnu hesla",
         html: `
             <p>Dobrý den${userName ? `, <strong>${userName}</strong>` : ""},</p>
-            <p>váš ověřovací kód pro změnu hesla je:</p>
+            <p>Váš ověřovací kód pro změnu hesla je:</p>
             <h2 style="letter-spacing: 4px;">${code}</h2>
             <p>Kód je platný <strong>10 minut</strong>.</p>
-            <p>Pokud jste o změnu hesla nežádala, tento e-mail ignorujte.</p>
+            <p>Pokud jste o změnu hesla nežádal/a, tento e-mail ignorujte.</p>
         `
     });
 }
@@ -64,10 +64,10 @@ async function sendRegistrationVerificationCode(email, code, userName) {
         html: `
             <p>Dobrý den${userName ? `, <strong>${userName}</strong>` : ""},</p>
             <p>děkujeme za registraci do aplikace TravelApp.</p>
-            <p>váš ověřovací kód je:</p>
+            <p>Váš ověřovací kód je:</p>
             <h2 style="letter-spacing: 4px;">${code}</h2>
             <p>Kód je platný <strong>10 minut</strong>.</p>
-            <p>Pokud jste o registraci nežádala, tento e-mail ignorujte.</p>
+            <p>Pokud jste o registraci nežádal/a, tento e-mail ignorujte.</p>
         `
     });
 }

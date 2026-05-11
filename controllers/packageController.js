@@ -36,7 +36,7 @@ function getCategoryPackingItems(category) {
         case "city":
             return ["Pohodlné boty", "Doklady / rezervace", "Městský batoh / kabelka", "Sluchátka", "Deštník"];
         case "roadtrip":
-            return ["Řidičský průkaz", "Doklady od auta", "Nabíječka do auta", "Držák na mobil", "Powerbanka", "Voda a svačina", "Sluneční brýle", "Lékárnička", "Hotovost"];
+            return ["Řidičský průkaz", "Doklady od auta", "Nabíječka do auta", "Držák na mobil", "Powerbanka", "Sluneční brýle", "Lékárnička", "Hotovost"];
         default:
             return [];
     }

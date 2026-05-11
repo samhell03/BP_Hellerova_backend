@@ -22,7 +22,7 @@ function generateToken(user) {
 
 function validatePasswordRules(password) {
     if (!password) {
-        return "Vyplň nové heslo.";
+        return "Vyplňte nové heslo.";
     }
 
     if (password !== password.trim()) {
@@ -62,7 +62,7 @@ exports.register = async (req, res) => {
 
         if (!userName || !email || !password) {
             return res.status(400).json({
-                message: "Vyplň všechna pole."
+                message: "Vyplňte všechna pole."
             });
         }
 
@@ -77,7 +77,7 @@ exports.register = async (req, res) => {
 
         if (!trimmedName) {
             return res.status(400).json({
-                message: "Zadej jméno."
+                message: "Zadejte jméno."
             });
         }
 
@@ -173,7 +173,7 @@ exports.verifyRegistrationCode = async (req, res) => {
 
         if (!email || !code) {
             return res.status(400).json({
-                message: "Vyplň e-mail i ověřovací kód."
+                message: "Vyplňte e-mail i ověřovací kód."
             });
         }
 
@@ -254,7 +254,7 @@ exports.resendRegistrationCode = async (req, res) => {
 
         if (!email || !email.trim()) {
             return res.status(400).json({
-                message: "Zadej e-mail."
+                message: "Zadejte e-mail."
             });
         }
 
@@ -299,7 +299,7 @@ exports.login = async (req, res) => {
 
         if (!email || !password) {
             return res.status(400).json({
-                message: "Vyplň email i heslo."
+                message: "Vyplňte email i heslo."
             });
         }
 
@@ -462,7 +462,7 @@ exports.changePassword = async (req, res) => {
 
         if (!currentPassword || !newPassword) {
             return res.status(400).json({
-                message: "Vyplň všechna pole."
+                message: "Vyplňte všechna pole."
             });
         }
 
@@ -535,7 +535,7 @@ exports.requestPasswordChangeCode = async (req, res) => {
 
         if (!currentPassword || !newPassword) {
             return res.status(400).json({
-                message: "Vyplň všechna pole."
+                message: "Vyplňte všechna pole."
             });
         }
 
@@ -735,7 +735,7 @@ exports.resetPassword = async (req, res) => {
 
         if (!email || !code || !newPassword) {
             return res.status(400).json({
-                message: "Vyplň e-mail, kód i nové heslo."
+                message: "Vyplňte e-mail, kód i nové heslo."
             });
         }
 
@@ -783,7 +783,7 @@ exports.resetPassword = async (req, res) => {
             await user.save();
 
             return res.status(400).json({
-                message: "Platnost ověřovacího kódu vypršela. Požádej o nový kód."
+                message: "Platnost ověřovacího kódu vypršela. Požádejte o nový kód."
             });
         }
 
@@ -827,7 +827,7 @@ exports.updateName = async (req, res) => {
 
         if (!userName || !userName.trim()) {
             return res.status(400).json({
-                message: "Zadej nové jméno."
+                message: "Zadejte nové jméno."
             });
         }
 

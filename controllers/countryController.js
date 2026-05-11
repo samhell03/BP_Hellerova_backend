@@ -1,9 +1,8 @@
 ﻿const axios = require("axios");
 
-// ===== COUNTRIES CACHE (RAM) =====
 let countriesCache = null;
 let countriesCacheTime = 0;
-const COUNTRIES_TTL_MS = 24 * 60 * 60 * 1000; // 24 hodin
+const COUNTRIES_TTL_MS = 24 * 60 * 60 * 1000; 
 
 const COUNTRIES_URLS = [
     "https://restcountries.com/v3.1/all?fields=name,cca2,flags,latlng,translations",
@@ -55,7 +54,6 @@ async function fetchCountriesFromApi() {
     throw lastError || new Error("Nepodařilo se načíst země z externího API.");
 }
 
-// GET /api/countries
 exports.getCountries = async (req, res) => {
     try {
         const now = Date.now();
@@ -84,7 +82,6 @@ exports.getCountries = async (req, res) => {
     }
 };
 
-// GET /api/countries/cities/search?city=Praha&countryCode=CZ
 exports.searchCity = async (req, res) => {
     try {
         const city = String(req.query.city || "").trim();
